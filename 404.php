@@ -10,51 +10,18 @@
 get_header();
 ?>
 
-	<main id="primary" class="site-main">
-
-		<section class="error-404 not-found">
-			<header class="page-header">
-				<h1 class="page-title"><?php esc_html_e( 'Oops! That page can&rsquo;t be found.', 'reuse' ); ?></h1>
-			</header><!-- .page-header -->
-
-			<div class="page-content">
-				<p><?php esc_html_e( 'It looks like nothing was found at this location. Maybe try one of the links below or a search?', 'reuse' ); ?></p>
-
-					<?php
-					get_search_form();
-
-					the_widget( 'WP_Widget_Recent_Posts' );
-					?>
-
-					<div class="widget widget_categories">
-						<h2 class="widget-title"><?php esc_html_e( 'Most Used Categories', 'reuse' ); ?></h2>
-						<ul>
-							<?php
-							wp_list_categories(
-								array(
-									'orderby'    => 'count',
-									'order'      => 'DESC',
-									'show_count' => 1,
-									'title_li'   => '',
-									'number'     => 10,
-								)
-							);
-							?>
-						</ul>
-					</div><!-- .widget -->
-
-					<?php
-					/* translators: %1$s: smiley */
-					$reuse_archive_content = '<p>' . sprintf( esc_html__( 'Try looking in the monthly archives. %1$s', 'reuse' ), convert_smilies( ':)' ) ) . '</p>';
-					the_widget( 'WP_Widget_Archives', 'dropdown=1', "after_title=</h2>$reuse_archive_content" );
-
-					the_widget( 'WP_Widget_Tag_Cloud' );
-					?>
-
-			</div><!-- .page-content -->
-		</section><!-- .error-404 -->
-
-	</main><!-- #main -->
+<main id="primary" class="site-main">
+	<section class="min-h-screen flex flex-col items-center justify-center text-center px-6 py-12 bg-white">
+		<div class="robot mb-6">
+			<img src="<?php echo esc_url( get_template_directory_uri() . '/img/404.png' ); ?>" alt="Robot Error" class="w-[505px] max-w-[90vw] mx-auto" />
+		</div>
+		<h1 class="text-2xl font-bold text-[#28a745] mb-2">Oops!</h1>
+		<p class="text-base text-gray-700 mb-6">Trang không tìm thấy, vui lòng quay về trang chủ.</p>
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block px-10 py-2 rounded-full font-bold text-white bg-[#28a745] hover:bg-[#218838] transition">
+			Về trang chủ
+		</a>
+	</section>
+</main>
 
 <?php
 get_footer();

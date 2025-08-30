@@ -12,6 +12,46 @@ if ( ! defined( '_S_VERSION' ) ) {
 	define( '_S_VERSION', '1.0.0' );
 }
 
+// ---- Static routes (about, ...) ----
+add_action( 'init', function () {
+	add_rewrite_rule( '^tai-che/?$', 'index.php?static_page=tai-che', 'top' );
+	add_rewrite_rule( '^dang-ky/?$', 'index.php?static_page=dang-ky', 'top' );
+	add_rewrite_rule( '^dang-nhap/?$', 'index.php?static_page=dang-nhap', 'top' );
+	add_rewrite_rule( '^otp/?$', 'index.php?static_page=otp', 'top' );
+	add_rewrite_rule( '^quen-mat-khau/?$', 'index.php?static_page=quen-mat-khau', 'top' );
+	add_rewrite_rule( '^quen-mat-khau-thong-bao/?$', 'index.php?static_page=quen-mat-khau-thong-bao', 'top' );
+} );
+add_filter( 'query_vars', function ( $vars ) {
+	$vars[] = 'static_page';
+	return $vars;
+} );
+add_filter( 'template_include', function ( $template ) {
+	$slug = get_query_var( 'static_page' );
+	if ( $slug ) {
+		$file = get_template_directory() . "/templates/{$slug}.php";
+		if ( file_exists( $file ) ) {
+			return $file;
+		}
+	}
+	return $template;
+} );
+
+// ---- Auto flush rewrite rules an toàn ----
+// 1. Khi kích hoạt theme
+add_action( 'after_switch_theme', function () {
+	flush_rewrite_rules();
+} );
+// 2. Đảm bảo flush một lần khi có thay đổi routes (dựa trên key version)
+add_action( 'admin_init', function () {
+	$key = 'reuse_routes_flushed_v5';
+	if ( ! get_option( $key ) ) {
+		flush_rewrite_rules( false );
+		update_option( $key, time() );
+	}
+} );
+
+
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
@@ -141,7 +181,20 @@ function reuse_scripts() {
 	wp_enqueue_style( 'reuse-style', get_stylesheet_uri(), array(), _S_VERSION );
 	wp_style_add_data( 'reuse-style', 'rtl', 'replace' );
 
-	wp_enqueue_script( 'reuse-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
+	// Tailwind CSS (minified build)
+	wp_enqueue_script( 'tailwindcss', 'https://cdn.tailwindcss.com', array(), _S_VERSION);
+
+	// Font Awesome from node_modules
+	wp_enqueue_style( 'font-awesome', get_template_directory_uri() . '/node_modules/@fortawesome/fontawesome-free/css/all.min.css', array(), _S_VERSION);
+
+	// Alpine.js for interactive elements
+	wp_enqueue_script( 'alpinejs', 'https://unpkg.com/alpinejs', array(), _S_VERSION, true );
+	wp_script_add_data( 'alpinejs', 'defer', true );
+
+	// Custom js
+	wp_enqueue_script( 'reuse-custom', get_template_directory_uri() . '/js/app.js', array(), _S_VERSION, true );
+
+	// wp_enqueue_script( 'reuse-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
@@ -176,3 +229,10 @@ if ( defined( 'JETPACK__VERSION' ) ) {
 	require get_template_directory() . '/inc/jetpack.php';
 }
 
+/**
+ * Shortcode để lấy đường dẫn ảnh theme
+ */
+add_shortcode('theme_img', function($atts) {
+    $src = $atts['src'] ?? '';
+    return get_template_directory_uri() . '/img/' . $src;
+});
